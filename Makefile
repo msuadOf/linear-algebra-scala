@@ -1,0 +1,2 @@
+run:
+	mill runMain Main
