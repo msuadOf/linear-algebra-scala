@@ -15,7 +15,8 @@ object playground extends SbtModule with ScalafmtModule { m =>
     "-language:reflectiveCalls",
     "-deprecation",
     "-feature",
-    "-Xcheckinit"
+    "-Xcheckinit",
+    "-language:implicitConversions"
   )
   override def sources = T.sources {
     super.sources() ++ Seq(PathRef(millSourcePath / "main"))
