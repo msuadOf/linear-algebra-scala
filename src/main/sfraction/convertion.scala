@@ -4,6 +4,7 @@ object HasFraction {
   implicit class IntToFractionExtension(private val i: Int) extends AnyVal {
     def toFraction: Fraction = Fraction(i, 1)
     def F:          Fraction = toFraction
+    def ===(that: Fraction): Boolean = that == i.F
   }
   implicit class TupleToFractionExtension(private val t: (Int, Int)) extends AnyVal {
     def toFraction: Fraction = Fraction(t._1, t._2)

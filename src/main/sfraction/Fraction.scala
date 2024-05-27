@@ -53,7 +53,8 @@ case class Fraction private (val v: (Int, Int)) extends Numeric[Fraction] {
   def plus(x:   Fraction, y: Fraction): Fraction = x.do_+(y)
   def minus(x:  Fraction, y: Fraction): Fraction = x.do_-(y)
   def times(x:  Fraction, y: Fraction): Fraction = x.do_*(y)
-  def negate(x: Fraction): Fraction = Fraction(-1).do_-(x)
+  def negate(x: Fraction): Fraction = Fraction(0).do_-(x)
+  def negate: Fraction = Fraction(0).do_-(this)
 
   def fromInt(x:  Int):      Fraction = Fraction(x)
   def toInt(x:    Fraction): Int      = x.fenzi / x.fenmu
@@ -76,16 +77,21 @@ case class Fraction private (val v: (Int, Int)) extends Numeric[Fraction] {
   }
   def compare(x: Fraction, y: Fraction): Int = (x.do_-(y)).simplify().fenzi.sign
 
-  def +(that:  Fraction): Fraction = do_+(that)
-  def -(that:  Fraction): Fraction = do_-(that)
-  def *(that:  Fraction): Fraction = do_*(that)
-  def /(that:  Fraction): Fraction = do_/(that)
-  def x(that:  Fraction): Fraction = *(that)
-  def >(that:  Fraction): Boolean  = gt(this, that)
-  def >=(that: Fraction): Boolean  = gteq(this, that)
-  def <(that:  Fraction): Boolean  = lt(this, that)
-  def <=(that: Fraction): Boolean  = lteq(this, that)
-  def ===(that:String):Boolean = do_===(that)
+  def +(that:   Fraction): Fraction = do_+(that)
+  def -(that:   Fraction): Fraction = do_-(that)
+  def *(that:   Fraction): Fraction = do_*(that)
+  def /(that:   Fraction): Fraction = do_/(that)
+  def x(that:   Fraction): Fraction = *(that)
+  def >(that:   Fraction): Boolean  = gt(this, that)
+  def >=(that:  Fraction): Boolean  = gteq(this, that)
+  def <(that:   Fraction): Boolean  = lt(this, that)
+  def <=(that:  Fraction): Boolean  = lteq(this, that)
+  def ===(that: String):   Boolean  = do_===(that)
+
+  def abs: Fraction = Fraction(Math.abs(numerator), Math.abs(denominator))
+  def inv: Fraction = Fraction(denominator, numerator)
+  def min(that: Fraction): Fraction = if (this < that) this else that
+  def max(that: Fraction): Fraction = if (this > that) this else that
 
   def do_+(that: Fraction): Fraction = {
     val that_s = that.simplify()
@@ -111,9 +117,9 @@ case class Fraction private (val v: (Int, Int)) extends Numeric[Fraction] {
     val this_s = this.simplify()
     this_s * Fraction(that_s.fenmu, that_s.fenzi)
   }
-def do_===(that:String):Boolean = {
-  this.toString == that
-}
+  def do_===(that: String): Boolean = {
+    this.toString == that
+  }
 }
 
 object Fraction {
