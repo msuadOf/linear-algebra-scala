@@ -14,6 +14,10 @@ object HasFraction {
     def toFraction: Fraction = Fraction(s)
     def F:          Fraction = toFraction
   }
+  implicit class FractionToFractionExtension(private val f: Fraction) extends AnyVal {
+    def toFraction: Fraction = f
+    def F:          Fraction = toFraction
+  }
 
   import scala.language.implicitConversions
   implicit def stringToFraction(str: String): Fraction = Fraction(str)

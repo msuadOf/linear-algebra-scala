@@ -74,10 +74,10 @@ object Main extends App with HasCheck {
 
   val m = Matrix((-1.F / 2, 2), (3, 4), (5, 6))
   val n = Matrix(
-    (-1.F / 2, 2),
-    (1, 4),
-    (5, 6)
+    (1, 1, 1),
+    (0, 1, 1),
+    (0, 0, 1)
   )
   println((2 + 3.F).getClass.getName)
-  println(m == n)
+  println(n.S.det)
 }
