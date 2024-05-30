@@ -74,9 +74,12 @@ object Main extends App with HasCheck {
     (1, 0, 1, -1),
     (10, 2, 5, 1),
     (1, 2, 6, 1),
-    (1, 6, 3, 3),
+    (1, 6, 3, 3)
   )
+    val p = Matrix((-1.F / 2, 2), 
+                    (3, 4)).toSquareMatrix
   println((2 + 3.F).getClass.getName)
-  println(n.numCols)
-  println(n.toReducedRowEchelonForm)
+  println(n.T.r)
+  println(Matrix((n, n).A.rows))
+  println(p.adjoint )
 }

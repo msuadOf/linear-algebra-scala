@@ -2,6 +2,9 @@ package linearAlgebra
 
 import sfraction._
 import sfraction.HasFraction._
+
+//Parallel
+import scala.collection.parallel.CollectionConverters._
 abstract class MatrixLike(val rows: Array[Array[Fraction]]) {
   def numRows:  Int     = rows.length
   def numCols:  Int     = rows.headOption.getOrElse(Array.empty).length
@@ -11,6 +14,7 @@ abstract class MatrixLike(val rows: Array[Array[Fraction]]) {
   def toSquareMatrix: SquareMatrix = new SquareMatrix(rows)
   def toS = toSquareMatrix
   def S   = toSquareMatrix
+  def toAugmentedMatrix(DivideColNumber:Int):AugmentedMatrix=new AugmentedMatrix(this.rows,DivideColNumber)
 }
 
 class Matrix(override val rows: Array[Array[Fraction]]) extends MatrixLike(rows) {
@@ -41,7 +45,7 @@ class Matrix(override val rows: Array[Array[Fraction]]) extends MatrixLike(rows)
   }
 
   // 打印矩阵右对齐
-  private var toStringAlignNum: Int = 1
+  var toStringAlignNum: Int = 1
   def toStringSetAlignStyle(info: String) = {
     toStringAlignNum = info match {
       case "right"  => 1
@@ -207,7 +211,8 @@ class Matrix(override val rows: Array[Array[Fraction]]) extends MatrixLike(rows)
 
           // 更新当前行，并对后续行进行消元操作
           val updatedMatrix = currentMatrix.updateRow(row, newRow)
-          val clearedBelow = (row + 1 until numRows).foldLeft(updatedMatrix) { (mat, r) =>
+          //并行
+          val clearedBelow = (row + 1 until numRows).par.foldLeft(updatedMatrix) { (mat, r) =>
             val factor = mat(r, pivot)
             if (!factor.isZero) {
               // 用当前行消去下一行的相应元素
@@ -252,7 +257,8 @@ class Matrix(override val rows: Array[Array[Fraction]]) extends MatrixLike(rows)
 
       pivotCol match {
         case Some(pivot) =>
-          val clearedAbove = (0 until row).foldRight(currentMatrix) { (r, mat) =>
+          //并行
+          val clearedAbove = (0 until row).par.foldRight(currentMatrix) { (r, mat) =>
             val factor    = mat(r, pivot)
             val scaledRow = currentMatrix.rows(row)
             if (!factor.isZero) {
@@ -272,6 +278,12 @@ class Matrix(override val rows: Array[Array[Fraction]]) extends MatrixLike(rows)
 
   }
 
+  //秩
+  def rank: Int = {
+    val rref = toRowEchelonForm
+    numRows - (0 until rref.numRows).count(r => (0 until rref.numCols).forall(c => rref(r, c).isZero))
+  }
+  def r: Int = rank
 }
 
 object Matrix {
@@ -296,4 +308,5 @@ object Matrix {
   def E(n: Int, i: Int, j: Int): SquareMatrix = E(n).swapRow(i, j).toSquareMatrix
   def E(n: Int, i: Int, j: Int, k: Fraction): SquareMatrix = E(n).update(j, i, k).toSquareMatrix
   def E(n: Int, i: Int, k: Fraction): SquareMatrix = E(n).update(i, i, k).toSquareMatrix
+  def E(n: Int,  k: Fraction): SquareMatrix = E(n).scalarMultiply(k).toSquareMatrix
 }

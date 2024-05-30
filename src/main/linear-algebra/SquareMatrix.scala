@@ -1,11 +1,14 @@
 package linearAlgebra
 import sfraction._
 import sfraction.HasFraction._
+
+import linearAlgebra.Implicits._
 class SquareMatrix(override val rows: Array[Array[Fraction]]) extends Matrix(rows) {
   require(
     rows.length > 0 && rows.forall(_.length == rows.length),
     "[SquareMatrix]:[" + numRows + "x" + numCols + "], not a square matrix." + this.toString
   )
+  def n = numRows
   override def toString: String = toString("SquareMatrix")
 
   // 计算行列式
@@ -34,7 +37,15 @@ class SquareMatrix(override val rows: Array[Array[Fraction]]) extends Matrix(row
     }
     SquareMatrix(filteredRows.toArray)
   }
-
+  def inverse: SquareMatrix = {
+    require(r == n , "Matrix must be square to calculate inverse.")
+    val (_:Matrix,inversed:Matrix)=AugmentedMatrix(this,Matrix.E(n)).toReducedRowEchelonForm ()
+    inversed.toSquareMatrix
+  }
+  override def *(that: Fraction): SquareMatrix = (super.*(that) ).toSquareMatrix
+  def adjoint: SquareMatrix={
+    inverse * (det)
+  }
 }
 
 // 提供工厂方法或转换方法

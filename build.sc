@@ -16,15 +16,17 @@ object playground extends SbtModule with ScalafmtModule { m =>
     "-deprecation",
     "-feature",
     "-Xcheckinit",
-    "-language:implicitConversions"
+    "-language:implicitConversions",
+    "-language:postfixOps"
   )
   override def sources = T.sources {
     super.sources() ++ Seq(PathRef(millSourcePath / "main"))
   }
-  // override def ivyDeps = Agg(
-  //   // if (useChisel3) ivy"edu.berkeley.cs::chisel3:3.6.0" else
-  //   // ivy"org.chipsalliance::chisel:7.0.0-M1"
-  // )
+  override def ivyDeps = Agg(
+    // if (useChisel3) ivy"edu.berkeley.cs::chisel3:3.6.0" else
+    // ivy"org.chipsalliance::chisel:7.0.0-M1"
+    ivy"org.scala-lang.modules::scala-parallel-collections::0.2.0"
+  )
   // override def scalacPluginIvyDeps = Agg(
   //   // if (useChisel3) ivy"edu.berkeley.cs:::chisel3-plugin:3.6.0" else
   //   // ivy"org.chipsalliance:::chisel-plugin:7.0.0-M1"

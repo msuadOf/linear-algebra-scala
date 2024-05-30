@@ -22,5 +22,13 @@ object Implicits {
       case _ => throw new IllegalArgumentException("Unsupported operation for type.")
     }
   }
+  implicit class intMatrixExtension(private val f: Int) {
+    def *(that: Matrix): Matrix = that.scalarMultiply(Fraction(f))
+    //[ ]TODO: 重载操作符 +
+    // def +(that: Matrix): Matrix = that.scalarAdd(Fraction(f))
+  }
+  implicit class TuppleMatrixExtension(private val t: (Matrix, Matrix)) {
+    def A: AugmentedMatrix = AugmentedMatrix(t._1, t._2)
+  }
 
 }
