@@ -65,19 +65,18 @@ object Main extends App with HasCheck {
 
   println("====start====")
 
-  // Fraction_compute_checkList.foreach((i) => {
-  //   checkonce(i)
-  // })
-  // Fraction_mathOps_checkList.foreach(checkonce)
-  // check(Fraction_mathOps_checkList)
   check(Matrix_ops_checkList)
 
   val m = Matrix((-1.F / 2, 2), (3, 4), (5, 6))
   val n = Matrix(
-    (1, 1, 1),
-    (0, 1, 1),
-    (0, 0, 1)
+    (1, 2, 3, 1),
+    (2, -1, 1, -3),
+    (1, 0, 1, -1),
+    (10, 2, 5, 1),
+    (1, 2, 6, 1),
+    (1, 6, 3, 3),
   )
   println((2 + 3.F).getClass.getName)
-  println(n.S.det)
+  println(n.numCols)
+  println(n.toReducedRowEchelonForm)
 }

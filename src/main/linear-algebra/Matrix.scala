@@ -15,6 +15,9 @@ abstract class MatrixLike(val rows: Array[Array[Fraction]]) {
 
 class Matrix(override val rows: Array[Array[Fraction]]) extends MatrixLike(rows) {
 
+  def this(matrix: Matrix) = this(matrix.rows.clone().map(_.clone()))
+
+  def copy() = new Matrix(this)
   // def this(rows: Seq[Product]) = {
   //   this(rows.map(row => row.productIterator.toArray).toArray)
   // }
@@ -23,9 +26,18 @@ class Matrix(override val rows: Array[Array[Fraction]]) extends MatrixLike(rows)
   def apply(i: Int, j: Int): Fraction = rows(i)(j)
   def apply(i: Int) = rows(i)
 
+  def rowSelected(i: Int) = rows(i)
+  def colSelected(j: Int) = rows.map(_(j))
+
   // 修复update方法，使其为泛型方法
-  def update(i: Int, j: Int, value: Fraction): Unit = {
-    rows(i)(j) = value
+  def update(i: Int, j: Int, value: Fraction): Matrix = {
+    val a = rows
+    a(i)(j) = value
+    Matrix(a)
+  }
+  def updateRow(rowIndex: Int, newRow: Array[Fraction]): Matrix = {
+    val updatedRows = rows.take(rowIndex) ++ Array(newRow) ++ rows.drop(rowIndex + 1)
+    new Matrix(updatedRows)
   }
 
   // 打印矩阵右对齐
@@ -130,7 +142,7 @@ class Matrix(override val rows: Array[Array[Fraction]]) extends MatrixLike(rows)
   def *(that: Matrix): Matrix = {
     require(
       numCols == that.numRows,
-      "The number of columns in the first matrix must equal the number of rows in the second matrix for multiplication."
+      "The number of columns(" + numCols + ") in the first matrix must equal the number of rows(" + that.numRows + ") in the second matrix for multiplication."
     )
 
     val resultRows = for (i <- 0 until numRows) yield {
@@ -151,84 +163,115 @@ class Matrix(override val rows: Array[Array[Fraction]]) extends MatrixLike(rows)
   def ==(that:  Matrix): Boolean = equal(that)
   def ===(that: Matrix): Boolean = equal(that)
 
+  def swapRow(i: Int, j: Int): Matrix = this.updateRow(j, rows(i)).updateRow(i, rows(j))
+  def swapCol(i: Int, j: Int): Matrix = this * Matrix.E(this.numCols, i, j)
   //=============================
+
+  def xiaoquyuansu(Origin: (Int, Int), Target: (Int, Int)) = {
+    val (i, j) = (Origin._1, Target._1)
+    val bili   = rows(Target._1)(Target._2).F / rows(Origin._1)(Origin._2).F
+    (Matrix.E(this.numRows, i, j, -bili) * this).rows(Target._1)
+  }
+  def xiaoquxiamianyuansu(i: Int, j: Int) = {
+    Matrix(rows.zipWithIndex.map {
+      case (row, index) =>
+        if (index <= i) row
+        else {
+          val t = xiaoquyuansu((i, j), (index, j))
+          if (t(j + 1) == 0.F) t
+          else t.map(_ / t(j + 1))
+        }
+    })
+  }
   // 转换为行阶梯形
-  def toRowEchelonForm(): Matrix = {
-    var leadCol       = 0
+  def toRowEchelonForm: Matrix = {
+    // 使用foldLeft遍历每一行，逐步构建新的矩阵
+    //(0 until numRows).foldLeft(this) { (currentMatrix, row) =>
     var currentMatrix = this
-    for (row <- 0 until numRows) {
-      if (leadCol >= numCols) return currentMatrix
+    var row           = 0
+    while (row < numRows) {
+      // 已经处理过的列，避免重复操作
+      val processedCols = (0 until row).toSet
+      // 在当前行寻找第一个非零元素的列索引，跳过已处理列
+      val pivotCol = (row until numCols).find(c => !currentMatrix(row, c).isZero && !processedCols.contains(c))
 
-      var i = row
-      while (i < numRows && currentMatrix.rows(i)(leadCol).numerator == 0) i += 1
-      if (i == numRows) {
-        leadCol += 1
-      } else {
-        // 行交换
-        val tempRow = currentMatrix.rows(row)
-        currentMatrix = new Matrix(currentMatrix.rows.updated(row, currentMatrix.rows(i)).updated(i, tempRow))
-
-        // 将主元素变为1
-        val pivot       = currentMatrix.rows(row)(leadCol)
-        val denominator = pivot.denominator
-        if (denominator != 1) {
-          val newRow =
-            currentMatrix.rows(row).map(elem => Fraction(elem.numerator * denominator, elem.denominator * denominator))
-          currentMatrix = new Matrix(currentMatrix.rows.updated(row, newRow))
-        }
-
-        // 高斯消元
-        for (k <- row + 1 until numRows) {
-          val multiplierNumerator   = currentMatrix.rows(k)(leadCol).numerator
-          val multiplierDenominator = currentMatrix.rows(k)(leadCol).denominator
-          if (multiplierNumerator != 0) {
-            val newRow = currentMatrix.rows(k).zip(currentMatrix.rows(row)).map {
-              case (a, b) =>
-                val productNumerator   = a.numerator * b.denominator - b.numerator * a.denominator
-                val productDenominator = a.denominator * b.denominator
-                Fraction(productNumerator, productDenominator)
-            }
-            currentMatrix = new Matrix(currentMatrix.rows.updated(k, newRow))
+      pivotCol match {
+        case Some(pivot) =>
+          // 保证主元为1
+          val scale     = currentMatrix(row, pivot).inverse
+          val scaledRow = currentMatrix.rows(row).map(_ * scale)
+          val newRow = scaledRow.zipWithIndex.map {
+            case (v, i) if i == pivot => v
+            case (v, _)               => v
           }
-        }
-        leadCol += 1
+
+          // 更新当前行，并对后续行进行消元操作
+          val updatedMatrix = currentMatrix.updateRow(row, newRow)
+          val clearedBelow = (row + 1 until numRows).foldLeft(updatedMatrix) { (mat, r) =>
+            val factor = mat(r, pivot)
+            if (!factor.isZero) {
+              // 用当前行消去下一行的相应元素
+              val newRowBelow = mat.rows(r).zip(scaledRow).map {
+                case (v, pv) => v - (pv * factor)
+              }
+              mat.updateRow(r, newRowBelow)
+            } else mat // 如果系数为0，不需要消去，直接保留当前矩阵
+          }
+          currentMatrix = clearedBelow
+          //branch 1
+          row = row + 1
+        case None =>
+          // 当前行全为0，直接跳过，移到最后一行
+          def moveRowToLastRow(matrix: Matrix, rowIndex: Int) =
+            (rowIndex until matrix.numRows - 1).foldLeft(matrix)((accMatrix, rowIndex) =>
+              accMatrix.swapRow(rowIndex, rowIndex + 1)
+            )
+          currentMatrix = moveRowToLastRow(currentMatrix, row)
+          //branch 2 重新开始本行的计算
+          if ((row until numRows).forall(r => { (row until numCols).forall(c => currentMatrix(r, c).isZero) }))
+            row    = numRows //ends
+          else row = row
       }
+
     }
     currentMatrix
   }
 
   // 转换为行最简形
-  def toReducedRowEchelonForm(): Matrix = {
-    val echelonMatrix = toRowEchelonForm()
-    var leadCol       = 0
-    var reducedMatrix = echelonMatrix
-    for (row <- (0 until numRows).reverse) {
-      if (leadCol >= numCols) return reducedMatrix
+  def toReducedRowEchelonForm: Matrix = {
+    // 首先获取行阶梯形矩阵
+    val rowEchelonMatrix = toRowEchelonForm
 
-      if (reducedMatrix.rows(row)(leadCol).numerator != 1) {
-        val newRow = reducedMatrix
-          .rows(row)
-          .map(elem => Fraction(elem.numerator, elem.denominator * reducedMatrix.rows(row)(leadCol).denominator))
-        reducedMatrix = new Matrix(reducedMatrix.rows.updated(row, newRow))
-      }
+    // 从最后一行开始，处理每一行
+    (0 until numRows).foldRight(rowEchelonMatrix) { (row, currentMatrix) =>
+      //[ ] 如果该行全为0，跳过
+      // 已经处理过的列，避免重复操作
+      val processedCols = (0 until row).toSet
+      // 在当前行寻找第一个非零元素的列索引，跳过已处理列
+      val pivotCol = (row until numCols).find(c => !currentMatrix(row, c).isZero && !processedCols.contains(c))
 
-      for (k <- 0 until row) {
-        val multiplierNumerator   = reducedMatrix.rows(k)(leadCol).numerator
-        val multiplierDenominator = reducedMatrix.rows(k)(leadCol).denominator
-        if (multiplierNumerator != 0) {
-          val newRow = reducedMatrix.rows(k).zip(reducedMatrix.rows(row)).map {
-            case (a, b) =>
-              val productNumerator   = a.numerator * b.denominator - b.numerator * a.denominator
-              val productDenominator = a.denominator * b.denominator
-              Fraction(productNumerator, productDenominator)
+      pivotCol match {
+        case Some(pivot) =>
+          val clearedAbove = (0 until row).foldRight(currentMatrix) { (r, mat) =>
+            val factor    = mat(r, pivot)
+            val scaledRow = currentMatrix.rows(row)
+            if (!factor.isZero) {
+              // 用当前行消去下一行的相应元素
+              val newRowBelow = mat.rows(r).zip(scaledRow).map {
+                case (v, pv) => v - (pv * factor)
+              }
+              mat.updateRow(r, newRowBelow)
+            } else mat // 如果系数为0，不需要消去，直接保留当前矩阵
           }
-          reducedMatrix = new Matrix(reducedMatrix.rows.updated(k, newRow))
-        }
+          clearedAbove
+        case None =>
+          // 当前行全为0，直接跳过
+          currentMatrix
       }
-      leadCol += 1
     }
-    reducedMatrix
+
   }
+
 }
 
 object Matrix {
@@ -236,4 +279,21 @@ object Matrix {
   // def apply(rows: Product*): Matrix = new Matrix(rows)
   def apply(rows: Array[Fraction]*):       Matrix = new Matrix(rows.toArray)
   def apply(rows: Array[Array[Fraction]]): Matrix = new Matrix(rows)
+  def Identity(size: Int): SquareMatrix = {
+    val identityRows = (0 until size).map(i =>
+      Array
+        .tabulate(size)(_ == i)
+        .map(i =>
+          Fraction(i match {
+            case true  => 1
+            case false => 0
+          })
+        )
+    )
+    new SquareMatrix(identityRows.toArray)
+  }
+  def E(n: Int): SquareMatrix = Identity(n)
+  def E(n: Int, i: Int, j: Int): SquareMatrix = E(n).swapRow(i, j).toSquareMatrix
+  def E(n: Int, i: Int, j: Int, k: Fraction): SquareMatrix = E(n).update(j, i, k).toSquareMatrix
+  def E(n: Int, i: Int, k: Fraction): SquareMatrix = E(n).update(i, i, k).toSquareMatrix
 }

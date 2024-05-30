@@ -38,7 +38,7 @@ case class Fraction private (val v: (Int, Int)) extends Numeric[Fraction] {
   def simplify(): Fraction = {
     require(
       denominator != 0,
-      "package sfraction::Fraction-simplify::The Denominator of a Fraction should not be equal."
+      "[Fraction]Fraction.simplify():The Denominator of a Fraction should not be equal to 0."
     )
     val gcd: Int = (BigInt(numerator).gcd(BigInt(denominator))).toInt
     val v_g        = (numerator / gcd, denominator / gcd)
@@ -87,6 +87,7 @@ case class Fraction private (val v: (Int, Int)) extends Numeric[Fraction] {
   def <(that:   Fraction): Boolean  = lt(this, that)
   def <=(that:  Fraction): Boolean  = lteq(this, that)
   def ===(that: String):   Boolean  = do_===(that)
+  def unary_- = Fraction(0, 1) - (this)
 
   def abs: Fraction = Fraction(Math.abs(numerator), Math.abs(denominator))
   def inv: Fraction = Fraction(denominator, numerator)
@@ -120,11 +121,15 @@ case class Fraction private (val v: (Int, Int)) extends Numeric[Fraction] {
   def do_===(that: String): Boolean = {
     this.toString == that
   }
+  def isZero    = this == Fraction(0)
+  def isNonZero = this != Fraction(0)
+  def inverse   = Fraction(1) / this
 }
 
 object Fraction {
   def apply(nume: Int, deno: Int): Fraction = Fraction((nume, deno)).simplify()
   def apply(num:  Int): Fraction = Fraction(num, 1)
+  def apply(nume: Fraction, deno: Fraction): Fraction = nume / deno
   def apply(str: String): Fraction = {
     val parts = str.split("/")
     require(parts.length == 2, "Invalid fraction format")
