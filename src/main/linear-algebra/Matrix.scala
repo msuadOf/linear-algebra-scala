@@ -14,7 +14,7 @@ abstract class MatrixLike(val rows: Array[Array[Fraction]]) {
   def toSquareMatrix: SquareMatrix = new SquareMatrix(rows)
   def toS = toSquareMatrix
   def S   = toSquareMatrix
-  def toAugmentedMatrix(DivideColNumber:Int):AugmentedMatrix=new AugmentedMatrix(this.rows,DivideColNumber)
+  def toAugmentedMatrix(DivideColNumber: Int): AugmentedMatrix = new AugmentedMatrix(this.rows, DivideColNumber)
 }
 
 class Matrix(override val rows: Array[Array[Fraction]]) extends MatrixLike(rows) {
@@ -43,7 +43,14 @@ class Matrix(override val rows: Array[Array[Fraction]]) extends MatrixLike(rows)
     val updatedRows = rows.take(rowIndex) ++ Array(newRow) ++ rows.drop(rowIndex + 1)
     new Matrix(updatedRows)
   }
-
+  def removeRow(rowIndexs: Seq[Int]): Matrix = {
+    val updatedRows = rows.zipWithIndex.filterNot { case (row, idx) => !rowIndexs.forall(idx != _) }
+    new Matrix(updatedRows.map(_._1))
+  }
+  def removeCol(colIndexs: List[Int]): Matrix = {
+    this.T.removeRow(colIndexs).T
+  }
+  def removeCol(colIndexs: Int*): Matrix = removeCol(colIndexs.toList)
   // 打印矩阵右对齐
   var toStringAlignNum: Int = 1
   def toStringSetAlignStyle(info: String) = {
@@ -155,6 +162,24 @@ class Matrix(override val rows: Array[Array[Fraction]]) extends MatrixLike(rows)
       }
     }
     new Matrix(resultRows.map(_.toArray).toArray)
+  }
+  def *^(that: Matrix): Matrix = {
+    require(
+      numCols == that.numRows,
+      "The number of columns(" + numCols + ") in the first matrix must equal the number of rows(" + that.numRows + ") in the second matrix for multiplication."
+    )
+    rows.map(_.map(n => require(n == 1.F || n == 0.F, "The matrix must be binary matrix.")))
+    val resultRows = for (i <- 0 until numRows) yield {
+      for (j <- 0 until that.numCols) yield {
+        (0 until numCols).map(k => rows(i)(k).v._1 ^ that.rows(k)(j).v._1).foldLeft(Fraction(0, 1)) { (a, c) =>
+          (a.v._1 & c.v._1).F
+        }
+      }
+    }
+    new Matrix(resultRows.map(_.toArray).toArray)
+  }
+  def unary_- : Matrix = {
+    new Matrix(rows.map(_.map(-_)))
   }
   def equal(that: Matrix): Boolean = {
     val a = this.rows
@@ -308,5 +333,5 @@ object Matrix {
   def E(n: Int, i: Int, j: Int): SquareMatrix = E(n).swapRow(i, j).toSquareMatrix
   def E(n: Int, i: Int, j: Int, k: Fraction): SquareMatrix = E(n).update(j, i, k).toSquareMatrix
   def E(n: Int, i: Int, k: Fraction): SquareMatrix = E(n).update(i, i, k).toSquareMatrix
-  def E(n: Int,  k: Fraction): SquareMatrix = E(n).scalarMultiply(k).toSquareMatrix
+  def E(n: Int, k: Fraction): SquareMatrix = E(n).scalarMultiply(k).toSquareMatrix
 }

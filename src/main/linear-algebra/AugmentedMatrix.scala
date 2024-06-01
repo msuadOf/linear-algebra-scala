@@ -20,10 +20,10 @@ class AugmentedMatrix(val m: Matrix, val n: Matrix) extends Matrix(m.rows.zip(n.
   def apply(): (Matrix, Matrix) = {
     (m, n)
   }
-  override def toReducedRowEchelonForm:AugmentedMatrix = {
+  override def toReducedRowEchelonForm: AugmentedMatrix = {
     super.toReducedRowEchelonForm.toAugmentedMatrix(this.getDivideColNumber())
   }
-  override   def toString(TypeTag: String): String = {
+  override def toString(TypeTag: String): String = {
     // 计算每列最大宽度，包括可能的负号和斜杠（针对Fraction的表示）
     val maxOverallWidth = rows.flatMap(_.map(_.toString.length)).max
     val columnWidths    = rows.head.indices.map(i => rows.map(_(i).toString.length).max)

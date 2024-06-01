@@ -38,12 +38,12 @@ class SquareMatrix(override val rows: Array[Array[Fraction]]) extends Matrix(row
     SquareMatrix(filteredRows.toArray)
   }
   def inverse: SquareMatrix = {
-    require(r == n , "Matrix must be square to calculate inverse.")
-    val (_:Matrix,inversed:Matrix)=AugmentedMatrix(this,Matrix.E(n)).toReducedRowEchelonForm ()
+    require(r == n, "Matrix must be square to calculate inverse.")
+    val (_: Matrix, inversed: Matrix) = AugmentedMatrix(this, Matrix.E(n)).toReducedRowEchelonForm()
     inversed.toSquareMatrix
   }
-  override def *(that: Fraction): SquareMatrix = (super.*(that) ).toSquareMatrix
-  def adjoint: SquareMatrix={
+  override def *(that: Fraction): SquareMatrix = (super.*(that)).toSquareMatrix
+  def adjoint: SquareMatrix = {
     inverse * (det)
   }
 }

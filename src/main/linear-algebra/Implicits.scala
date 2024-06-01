@@ -31,4 +31,14 @@ object Implicits {
     def A: AugmentedMatrix = AugmentedMatrix(t._1, t._2)
   }
 
+  implicit class MatrixExtension(private val m: Matrix) {
+    implicit class FractionModExtension(private val f: Fraction) {
+      def %(n: Int): Fraction = {
+        require(f.v._2 == 1, "[Implicit::Matrix::FractionModExtension]deno should be 1 ,while it is " + f.v._2)
+        f.v._1 % n
+      }
+    }
+    def mod(mod_n: Int): Matrix = Matrix(m.rows.map(r => r.map(_ % mod_n)))
+  }
+
 }

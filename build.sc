@@ -25,7 +25,8 @@ object playground extends SbtModule with ScalafmtModule { m =>
   override def ivyDeps = Agg(
     // if (useChisel3) ivy"edu.berkeley.cs::chisel3:3.6.0" else
     // ivy"org.chipsalliance::chisel:7.0.0-M1"
-    ivy"org.scala-lang.modules::scala-parallel-collections::0.2.0"
+    ivy"org.scala-lang.modules::scala-parallel-collections::0.2.0",
+    ivy"com.lihaoyi:ammonite_2.13.12:3.0.0-M0-52-d2acc162" //for repl
   )
   // override def scalacPluginIvyDeps = Agg(
   //   // if (useChisel3) ivy"edu.berkeley.cs:::chisel3-plugin:3.6.0" else
@@ -33,6 +34,7 @@ object playground extends SbtModule with ScalafmtModule { m =>
   // )
 
   def repositoriesTask = T.task { Seq(
+    coursier.MavenRepository("https://repo1.maven.org/maven2/"),
     coursier.MavenRepository("https://repo.scala-sbt.org/scalasbt/maven-releases"),
     coursier.MavenRepository("https://oss.sonatype.org/content/repositories/releases"),
     coursier.MavenRepository("https://oss.sonatype.org/content/repositories/snapshots"),

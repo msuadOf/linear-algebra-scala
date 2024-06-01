@@ -3,6 +3,7 @@ import sfraction.HasFraction._
 import scala.math.Numeric.Implicits._
 
 import linearAlgebra._
+import linearAlgebra.utils._
 import linearAlgebra.Implicits._
 object Main extends App with HasCheck {
   val Fraction_show_checkList = List(
@@ -76,10 +77,16 @@ object Main extends App with HasCheck {
     (1, 2, 6, 1),
     (1, 6, 3, 3)
   )
-    val p = Matrix((-1.F / 2, 2), 
-                    (3, 4)).toSquareMatrix
-  println((2 + 3.F).getClass.getName)
-  println(n.T.r)
-  println(Matrix((n, n).A.rows))
-  println(p.adjoint )
+  val p = Matrix((-1.F / 2, 2), (3, 4)).toSquareMatrix
+
+  val c   = List(1, 0, 1, 0, 1)
+  var c_e = c ++ List(c.reduce(_ ^ _))
+  c_e = c_e.updated(1, 1)
+  val c_d = c_e.reduce(_ ^ _)
+  println(c_e)
+  println(c_d)
+  print(n.mod(2))
+
+  println("\n====ECC start====")
+  test_ECC()
 }

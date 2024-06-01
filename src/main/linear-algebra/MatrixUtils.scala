@@ -1,14 +1,16 @@
-// package linearAlgebra
+package linearAlgebra
 
-// import sfraction._
-// import sfraction.HasFraction._
-// // import scala.math.Numeric.Implicits._
+import sfraction._
+import sfraction.HasFraction._
+// import scala.math.Numeric.Implicits._
 
-// import linearAlgebra.Implicits._
+import linearAlgebra.Implicits._
 
-// object utils{
-//     def E(n:Int,i:Int,j:Int):Matrix =
-//     def E(n:Int):Matrix
-//     def E(n:Int,i:Int,j:Int,k:Fraction):Matrix
-//     def E(n:Int,i:Int,k:Fraction):Matrix
-// }
+object utils {
+  def E(n: Int): SquareMatrix = Matrix.E(n)
+  def E(n: Int, i: Int, j: Int): SquareMatrix = Matrix.E(n, i, j)
+  def E(n: Int, i: Int, j: Int, k: Fraction): SquareMatrix = Matrix.E(n, i, j, k)
+  def E(n: Int, i: Int, k: Fraction): SquareMatrix = Matrix.E(n, i, k)
+  def E(n: Int, k: Fraction): SquareMatrix = Matrix.E(n, k)
+
+}
