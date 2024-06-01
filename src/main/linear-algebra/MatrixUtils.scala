@@ -13,4 +13,7 @@ object utils {
   def E(n: Int, i: Int, k: Fraction): SquareMatrix = Matrix.E(n, i, k)
   def E(n: Int, k: Fraction): SquareMatrix = Matrix.E(n, k)
 
+  def VecToMatrix(vecs:           Array[Vec]): Matrix           = PartColVecMatrix(vecs).toMatrix
+  def VecToPartColVecMatrix(vecs: Array[Vec]): PartColVecMatrix = PartColVecMatrix(vecs)
+  def VecToMatrix(vecs:           Vec*):       Matrix           = VecToMatrix(vecs.toArray)
 }

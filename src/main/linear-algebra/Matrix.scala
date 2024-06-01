@@ -10,11 +10,22 @@ abstract class MatrixLike(val rows: Array[Array[Fraction]]) {
   def numCols:  Int     = rows.headOption.getOrElse(Array.empty).length
   def isSquare: Boolean = rows.length > 0 && rows.forall(_.length == rows.length)
 
+  def T: MatrixLike
+
   def toMatrix:       Matrix       = new Matrix(rows)
   def toSquareMatrix: SquareMatrix = new SquareMatrix(rows)
   def toS = toSquareMatrix
   def S   = toSquareMatrix
   def toAugmentedMatrix(DivideColNumber: Int): AugmentedMatrix = new AugmentedMatrix(this.rows, DivideColNumber)
+
+  def toVecs:    Array[Vec] = this.T.rows.map(c => Vec(c)).toArray
+  def toColVecs: Array[Vec] = toVecs
+  def toVec:     Vec        = new Vec(toMatrix)
+  def toColVec:  Vec        = toVec
+
+  //experimental function
+  def toPartMatrix:       PartMatrix       = new PartMatrix(rows)
+  def toPartColVecMatrix: PartColVecMatrix = new PartColVecMatrix(rows)
 }
 
 class Matrix(override val rows: Array[Array[Fraction]]) extends MatrixLike(rows) {
@@ -43,14 +54,14 @@ class Matrix(override val rows: Array[Array[Fraction]]) extends MatrixLike(rows)
     val updatedRows = rows.take(rowIndex) ++ Array(newRow) ++ rows.drop(rowIndex + 1)
     new Matrix(updatedRows)
   }
-  def removeRow(rowIndexs: Seq[Int]): Matrix = {
+  def removeRow(rowIndexs: Array[Int]): Matrix = {
     val updatedRows = rows.zipWithIndex.filterNot { case (row, idx) => !rowIndexs.forall(idx != _) }
     new Matrix(updatedRows.map(_._1))
   }
-  def removeCol(colIndexs: List[Int]): Matrix = {
+  def removeCol(colIndexs: Array[Int]): Matrix = {
     this.T.removeRow(colIndexs).T
   }
-  def removeCol(colIndexs: Int*): Matrix = removeCol(colIndexs.toList)
+  def removeCol(colIndexs: Int*): Matrix = removeCol(colIndexs.toArray)
   // 打印矩阵右对齐
   var toStringAlignNum: Int = 1
   def toStringSetAlignStyle(info: String) = {
@@ -94,13 +105,13 @@ class Matrix(override val rows: Array[Array[Fraction]]) extends MatrixLike(rows)
     }.mkString("[", ", ", "]")
   }.mkString("\n")
 } */
-  def toString(TypeTag: String): String = {
+  def toString(ClassNameTag: String): String = {
     // 计算每列最大宽度，包括可能的负号和斜杠（针对Fraction的表示）
     val maxOverallWidth = rows.flatMap(_.map(_.toString.length)).max
     val columnWidths    = rows.head.indices.map(i => rows.map(_(i).toString.length).max)
 
     // 格式化并打印矩阵，确保整体右对齐
-    "\n" + TypeTag + ("[" + numRows + "x" + numCols + "]") + ":\n" + rows.map { row =>
+    "\n" + ClassNameTag + ("[" + numRows + "x" + numCols + "]") + ":\n" + rows.map { row =>
       row
         .zip(columnWidths)
         .map {

@@ -1,6 +1,7 @@
 package linearAlgebra
 import sfraction._
 import sfraction.HasFraction._
+import linearAlgebra.utils._
 object Implicits {
 
   import scala.language.implicitConversions
@@ -29,6 +30,14 @@ object Implicits {
   }
   implicit class TuppleMatrixExtension(private val t: (Matrix, Matrix)) {
     def A: AugmentedMatrix = AugmentedMatrix(t._1, t._2)
+  }
+  implicit class TupplesToMatrixExtension(private val t: Product) {
+    def Mat: Matrix = VecToMatrix(t.productIterator.toArray.map {
+      case col_vec: Vec => col_vec
+      case x => throw new IllegalArgumentException(s"[Tupples To Matrix]Unsupported type: ${x.getClass.getName}")
+
+    })
+
   }
 
   implicit class MatrixExtension(private val m: Matrix) {

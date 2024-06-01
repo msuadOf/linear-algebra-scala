@@ -23,13 +23,13 @@ class AugmentedMatrix(val m: Matrix, val n: Matrix) extends Matrix(m.rows.zip(n.
   override def toReducedRowEchelonForm: AugmentedMatrix = {
     super.toReducedRowEchelonForm.toAugmentedMatrix(this.getDivideColNumber())
   }
-  override def toString(TypeTag: String): String = {
+  override def toString(ClassNameTag: String): String = {
     // 计算每列最大宽度，包括可能的负号和斜杠（针对Fraction的表示）
     val maxOverallWidth = rows.flatMap(_.map(_.toString.length)).max
     val columnWidths    = rows.head.indices.map(i => rows.map(_(i).toString.length).max)
 
     // 格式化并打印矩阵，确保整体右对齐
-    "\n" + TypeTag + ("[" + numRows + "x" + numCols + "]") + ":\n" + rows.map { row =>
+    "\n" + ClassNameTag + ("[" + numRows + "x" + numCols + "]") + ":\n" + rows.map { row =>
       row
         .zip(columnWidths)
         .map {
@@ -51,4 +51,5 @@ object AugmentedMatrix {
   def apply(m:    Matrix, n:                               Matrix): AugmentedMatrix = new AugmentedMatrix(m, n)
   def apply(rows: Array[Array[Fraction]], DivideColNumber: Int): AugmentedMatrix =
     new AugmentedMatrix(rows, DivideColNumber)
+  //def apply(vecs: Array[Vec]):      Matrix = (new Matrix( vecs.map( _.T.rows(0)).toArray ) ).T
 }
