@@ -91,6 +91,6 @@ object Main extends App with HasCheck {
   println((v, v, v).Mat.toPartColVecMatrix)
   // println("\n====ECC start====")
   // test_ECC()
-  
-test_660()
+
+  test_660()
 }

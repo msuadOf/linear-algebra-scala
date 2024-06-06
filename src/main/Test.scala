@@ -1,3 +1,3 @@
-class Test(name:String){
-    println(s"\n====[Test]:${name} start====")
+class Test(name: String) {
+  println(s"\n====[Test]:${name} start====")
 }
