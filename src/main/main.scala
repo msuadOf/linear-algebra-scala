@@ -89,6 +89,8 @@ object Main extends App with HasCheck {
 
   val v = Vec(1, 3, 2)
   println((v, v, v).Mat.toPartColVecMatrix)
-  println("\n====ECC start====")
-  test_ECC()
+  // println("\n====ECC start====")
+  // test_ECC()
+  
+test_660()
 }
