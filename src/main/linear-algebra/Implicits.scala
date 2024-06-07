@@ -40,6 +40,10 @@ object Implicits {
 
   }
 
+  implicit class ArrayToMatrixExtension(private val a: Array[Array[Fraction]]) {
+    def Mat: Matrix = Matrix(a)
+  }
+
   implicit class MatrixExtension(private val m: Matrix) {
     implicit class FractionModExtension(private val f: Fraction) {
       def %(n: Int): Fraction = {

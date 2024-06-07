@@ -33,7 +33,7 @@ class PartColVecMatrix(rows: Array[Array[Fraction]]) extends PartMatrix(rows) {
         .mkString("[", " | ", "]")
     }.mkString("\n")
   }
-  
+
 }
 object PartColVecMatrix {
   def apply(vecs: Array[Vec]): PartColVecMatrix = new PartColVecMatrix(vecs)

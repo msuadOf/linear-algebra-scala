@@ -136,7 +136,6 @@ class Matrix(override val rows: Array[Array[Fraction]]) extends MatrixLike(rows)
     val transposedRows = (0 until numCols).map(i => rows.map(_.apply(i)))
     new Matrix(transposedRows.toArray)
   }
-
   /**
     * 矩阵相加
     */
